@@ -17,7 +17,10 @@ contract ProductFactory {
     string image;
   }
 
-  Product[] public products;
+  Product[] private products;
+
+  mapping (uint256 => address) internal productToOwner;
+  mapping (address => uint256) internal ownerProductCount;
 
   function createProduct(
     string calldata _name,
@@ -30,6 +33,29 @@ contract ProductFactory {
 
     uint256 id = products.length - 1;
 
+    productToOwner[id] = msg.sender;
+    ownerProductCount[msg.sender] ++;
+
     emit NewProduct(id, _name, _category, _description, _image);
+  }
+
+  function getProduct(uint256 _id)
+    external
+    view
+    returns (
+      string memory,
+      string memory,
+      string memory,
+      string memory,
+      address
+    )
+  {
+    return (
+      products[_id].name,
+      products[_id].category,
+      products[_id].description,
+      products[_id].image,
+      productToOwner[_id]
+    );
   }
 }

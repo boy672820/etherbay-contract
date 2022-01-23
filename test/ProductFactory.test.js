@@ -2,6 +2,7 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
 describe('ProductFactory', async function () {
+  let owner, user;
   let productFactory;
   let newProductEvents = [];
 
@@ -13,6 +14,11 @@ describe('ProductFactory', async function () {
   ];
 
   before(async function () {
+    const [ownerSigner, addrSigner] = await ethers.getSigners();
+
+    owner = ownerSigner;
+    user = addrSigner;
+
     const Factory = await ethers.getContractFactory('ProductFactory');
     const factory = await Factory.deploy();
     await factory.deployed();
@@ -21,7 +27,7 @@ describe('ProductFactory', async function () {
   });
 
   it('#1 상품 생성하기', async function () {
-    const createProduct = await productFactory.createProduct(...product);
+    const createProduct = await productFactory.connect(user).createProduct(...product);
 
     const receipt = await createProduct.wait();
 
@@ -37,9 +43,20 @@ describe('ProductFactory', async function () {
     const lastEvent = newProductEvents.pop();
     const productId = lastEvent.args.id.toNumber();
 
-    const { name, category, description, image, ...hot } = await productFactory.products(productId);
-    const newProduct = Object.values(hot);
+    const [...hot] = await productFactory.getProduct(productId);
+    const productOwner = hot.pop();
 
-    expect(newProduct).deep.to.equal(product);
+    expect(hot).deep.to.equal(product);
+    expect(productOwner).to.equal(user.address);
   });
+
+  // it('#3 BalanceOf and ownerOf', async function () {
+  //   const Ownership = await ethers.getContractFactory('ProductOwnership');
+  //   const ownership = await Ownership.deploy();
+  //   await ownership.deployed();
+
+  //   const balance = await ownership.balanceOf(user.address);
+
+  //   console.log(balance);
+  // });
 });
