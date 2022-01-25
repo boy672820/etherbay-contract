@@ -45,10 +45,8 @@ describe('ProductFactory', async function () {
     newProductId = productId;
 
     const [...hot] = await productOwnership.getProduct(productId);
-    const productOwner = hot.pop();
 
     expect(hot).deep.to.equal(product);
-    expect(productOwner).to.equal(user.address);
   });
 
   it('#3 Ownable 체크', async function () {
