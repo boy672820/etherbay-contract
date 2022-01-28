@@ -2,9 +2,10 @@ const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
 describe('ProductFactory', async function () {
-  let owner, user;
+  let owner, user, spender;
   let productOwnership;
-  let newProductEvents = [], newProductId;
+  let newProductEvents = [],
+    newProductId;
 
   const product = [
     'MacBook-pro M1X 16inch',
@@ -14,9 +15,10 @@ describe('ProductFactory', async function () {
   ];
 
   before(async function () {
-    const [ownerSigner, addrSigner] = await ethers.getSigners();
+    const [ownerSigner, addrSigner, addr2Signer] = await ethers.getSigners();
     owner = ownerSigner;
     user = addrSigner;
+    spender = addr2Signer;
 
     const Ownership = await ethers.getContractFactory('ProductOwnership');
     const ownership = await Ownership.deploy();
@@ -27,7 +29,9 @@ describe('ProductFactory', async function () {
   });
 
   it('#1 상품 생성하기', async function () {
-    const createProduct = await productOwnership.connect(user).createProduct(...product);
+    const createProduct = await productOwnership
+      .connect(user)
+      .createProduct(...product);
 
     const receipt = await createProduct.wait();
 
@@ -55,5 +59,13 @@ describe('ProductFactory', async function () {
 
     expect(balanceOf.toNumber()).to.equal(1);
     expect(ownerOf).to.equal(user.address);
+  });
+
+  it('#4 토큰 승인', async function () {
+    await productOwnership.connect(user).approve(spender.address, newProductId);
+
+    const approved = await productOwnership.getApproved(newProductId);
+
+    expect(approved).to.equal(spender.address);
   });
 });
