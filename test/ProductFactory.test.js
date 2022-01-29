@@ -68,4 +68,15 @@ describe('ProductFactory', async function () {
 
     expect(approved).to.equal(spender.address);
   });
+
+  it('#5 승인 토큰 전송', async function () {
+    await productOwnership.connect(user).transferFrom(
+      user.address,
+      spender.address,
+      newProductId,
+    );
+
+    const productToOwner = await productOwnership.ownerOf(newProductId);
+    expect(productToOwner).to.equal(spender.address);
+  });
 });
