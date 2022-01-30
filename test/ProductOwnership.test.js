@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { ethers } = require('hardhat');
 
-describe('ProductFactory', async function () {
+describe('ProductOwnership', async function () {
   let owner, user, spender;
   let productOwnership;
   let newProductEvents = [],

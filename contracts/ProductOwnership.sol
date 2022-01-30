@@ -4,6 +4,9 @@ pragma solidity ^0.8.0;
 import './ProductFactory.sol';
 
 contract ProductOwnership is ProductFactory {
+  event Transfer(address from, address to, uint256 tokenId);
+  event Approval(address productToOwner, address to, uint256 tokenId);
+
   mapping(uint256 => address) private _approvals;
 
   /**
