@@ -6,7 +6,7 @@ import 'hardhat/console.sol';
 
 contract Escrow {
   event TradeStatusChange(uint256 tradeId, string status);
-  
+
   struct Trade {
     address poster;
     uint256 tokenId;
@@ -14,14 +14,22 @@ contract Escrow {
     bytes32 status; // open, executed, cancelled
   }
 
+  address private _owner;
+
   mapping(uint256 => Trade) public trades;
 
-  IProductOwnership product;
-  uint256 tradeCounter;
+  IProductOwnership public product;
+  uint256 public tradeCounter;
 
   constructor(address _productAddress) {
-    product = IProductOwnership(_productAddress);
+    _owner = msg.sender;
     tradeCounter = 0;
+    setProductOwnership(_productAddress);
+  }
+
+  modifier onlyOwner() {
+    require(_owner == msg.sender, 'Caller is not the owner');
+    _;
   }
 
   function openTrade(uint256 _tokenId, uint256 _amount) external {
@@ -39,5 +47,21 @@ contract Escrow {
     tradeCounter++;
 
     emit TradeStatusChange(tradeId, 'open');
+  }
+
+  function executeTrade(uint256 _tradeId) external payable {
+    require(trades[_tradeId].status == 'open', 'Trade is not open');
+    require(trades[_tradeId].amount == msg.value, 'Trade amount does not match.');
+
+    payable(msg.sender).transfer(msg.value);
+    // withdraw
+  }
+
+  function setProductOwnership(address _productAddress) public onlyOwner {
+    product = IProductOwnership(_productAddress);
+  }
+
+  function changeOwner(address _newOwner) public onlyOwner {
+    _owner = _newOwner;
   }
 }

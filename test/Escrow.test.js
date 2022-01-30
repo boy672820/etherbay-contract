@@ -63,15 +63,63 @@ describe('Escrow', async function () {
     expect(hot).deep.to.equal(product);
   });
 
+  it('#3 상품 승인하기', async function () {
+    await productOwnership.connect(user).approve(escrow.address, newProductId);
+
+    const approved = await productOwnership.getApproved(newProductId);
+
+    expect(approved).to.equal(escrow.address);
+  });
+
+  let newTradeId;
+
   it('#3 상품 에스크로 등록하기', async function () {
     const amount = ethers.utils.parseEther('1.25'); // 1.25 ETH
-    const openTrade = await escrow.connect(user).openTrade(newProductId, amount);
+    const openTrade = await escrow
+      .connect(user)
+      .openTrade(newProductId, amount);
 
     const receipt = await openTrade.wait();
     const events = receipt.events.filter((x) => {
       return x.event == 'TradeStatusChange';
     });
 
-    console.log(events);
+    const { status, tradeId } = events[0].args;
+    newTradeId = tradeId;
+
+    expect(status).to.equal('open');
+  });
+
+  it('#4 에스크로에 등록된 상품확인', async function () {
+    const { poster, status } = await escrow.trades(newTradeId);
+
+    const targetTrade = [poster, ethers.utils.parseBytes32String(status)];
+    const expectTrade = [user.address, 'open'];
+
+    expect(targetTrade).to.deep.equal(expectTrade);
+  });
+
+  it('#5 에스크로에 등록된 상품 구매하기', async function () {
+    const formatEther = (wei) => ethers.utils.formatEther(wei);
+    
+    console.log(formatEther(await spender.getBalance()));
+
+    const amount = ethers.utils.parseEther('1.25');
+    await escrow.connect(spender).executeTrade(newTradeId, { value: amount });
+
+    console.log(formatEther(await spender.getBalance()));
+  });
+
+  it('#0 ProductOwnership 컨트랙트 변경하기', async function () {
+    const Ownership = await ethers.getContractFactory('ProductOwnership');
+    const ownershipInstance = await Ownership.deploy();
+
+    await ownershipInstance.deployed();
+
+    await escrow.setProductOwnership(ownershipInstance.address);
+
+    const escrowProductAddress = await escrow.product();
+
+    expect(escrowProductAddress).to.equal(ownershipInstance.address);
   });
 });
