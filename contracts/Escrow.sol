@@ -6,6 +6,7 @@ import 'hardhat/console.sol';
 
 contract Escrow {
   event TradeStatusChange(uint256 tradeId, string status);
+  event BreakApproval(uint256 tradeId, address spender);
 
   struct Trade {
     address poster;
@@ -21,6 +22,8 @@ contract Escrow {
   mapping(uint256 => Trade) public trades;
   mapping(uint256 => address) public executedTradeToSpender;
   uint256 public tradeCounter;
+
+  mapping(uint256 => address) private _breakApprovals;
 
   // ----------------------------------------------------------------------
 
@@ -91,6 +94,45 @@ contract Escrow {
     trades[_tradeId].status = 'confirmed';
 
     emit TradeStatusChange(_tradeId, 'confirmed');
+  }
+
+  /**
+   * @dev 거래 파기
+   */
+  function breakTrade(uint256 _tradeId) external {
+    require(trades[_tradeId].status == 'executed', 'Trade is not excuted');
+    require(
+      msg.sender == executedTradeToSpender[_tradeId],
+      'Caller is not the spender'
+    );
+    require(msg.sender == _breakApprovals[_tradeId], 'Caller is not approved');
+
+    payable(executedTradeToSpender[_tradeId]).transfer(trades[_tradeId].amount);
+
+    trades[_tradeId].status = 'open';
+
+    emit TradeStatusChange(_tradeId, 'open');
+  }
+
+  /**
+   * @dev 거래 파기 승인
+   */
+  function approveBreak(uint256 _tradeId, address _spender) public {
+    require(
+      msg.sender == _owner || msg.sender == trades[_tradeId].poster,
+      'Caller is not the poster or owner'
+    );
+
+    _approveBreak(_tradeId, _spender);
+  }
+
+  /**
+   * @dev 거래 파기 승인
+   */
+  function _approveBreak(uint256 _tradeId, address _spender) private {
+    _breakApprovals[_tradeId] = _spender;
+
+    emit BreakApproval(_tradeId, _spender);
   }
 
   /**

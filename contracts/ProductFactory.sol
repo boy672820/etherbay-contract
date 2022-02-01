@@ -17,7 +17,7 @@ contract ProductFactory {
     string image;
   }
 
-  Product[] private products;
+  Product[] private _products;
 
   mapping(uint256 => address) public productToOwner;
   mapping(address => uint256) public ownerProductCount;
@@ -32,9 +32,9 @@ contract ProductFactory {
     string calldata _image
   ) external {
     Product memory newProduct = Product(_name, _category, _description, _image);
-    products.push(newProduct);
+    _products.push(newProduct);
 
-    uint256 id = products.length - 1;
+    uint256 id = _products.length - 1;
 
     productToOwner[id] = msg.sender;
     ownerProductCount[msg.sender]++;
@@ -56,10 +56,10 @@ contract ProductFactory {
     )
   {
     return (
-      products[_id].name,
-      products[_id].category,
-      products[_id].description,
-      products[_id].image
+      _products[_id].name,
+      _products[_id].category,
+      _products[_id].description,
+      _products[_id].image
     );
   }
 }
