@@ -22,6 +22,9 @@ contract ProductFactory {
   mapping(uint256 => address) public productToOwner;
   mapping(address => uint256) public ownerProductCount;
 
+  /**
+   * @dev 상품 생성
+   */
   function createProduct(
     string calldata _name,
     string calldata _category,
@@ -39,6 +42,9 @@ contract ProductFactory {
     emit NewProduct(id, _name, _category, _description, _image);
   }
 
+  /**
+   * @dev 상품 정보 가져오기
+   */
   function getProduct(uint256 _id)
     external
     view

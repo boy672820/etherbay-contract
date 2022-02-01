@@ -74,7 +74,7 @@ describe('Escrow', async function () {
   let newTradeId;
 
   it('#3 상품 에스크로 등록하기', async function () {
-    const amount = ethers.utils.parseEther('1.25'); // 1.25 ETH
+    const amount = ethers.utils.parseEther('1000'); // 1000 ETH
     const openTrade = await escrow
       .connect(user)
       .openTrade(newProductId, amount);
@@ -88,6 +88,10 @@ describe('Escrow', async function () {
     newTradeId = tradeId;
 
     expect(status).to.equal('open');
+
+    const ownerOf = await productOwnership.ownerOf(newProductId);
+
+    expect(ownerOf).to.equal(escrow.address);
   });
 
   it('#4 에스크로에 등록된 상품확인', async function () {
@@ -100,14 +104,37 @@ describe('Escrow', async function () {
   });
 
   it('#5 에스크로에 등록된 상품 구매하기', async function () {
-    const formatEther = (wei) => ethers.utils.formatEther(wei);
-    
-    console.log(formatEther(await spender.getBalance()));
+    const amount = ethers.utils.parseEther('1000');
 
-    const amount = ethers.utils.parseEther('1.25');
-    await escrow.connect(spender).executeTrade(newTradeId, { value: amount });
+    const executeTrade = await escrow
+      .connect(spender)
+      .executeTrade(newTradeId, { value: amount });
 
-    console.log(formatEther(await spender.getBalance()));
+    const receipt = await executeTrade.wait();
+    const events = receipt.events.filter((x) => {
+      return x.event == 'TradeStatusChange';
+    });
+
+    const { status } = events[0].args;
+
+    expect(status).to.equal('executed');
+  });
+
+  it('#6 에스크로에 등록된 상품 구매 확정하기', async function () {
+    const confirmTrade = await escrow.connect(user).confirmTrade(newTradeId);
+
+    const receipt = await confirmTrade.wait();
+    const events = receipt.events.filter((x) => {
+      return x.event == 'TradeStatusChange';
+    });
+
+    const { status } = events[0].args;
+
+    expect(status).to.equal('confirmed');
+
+    const ownerOf = await productOwnership.ownerOf(newProductId);
+
+    expect(ownerOf).to.equal(spender.address);
   });
 
   it('#0 ProductOwnership 컨트랙트 변경하기', async function () {
