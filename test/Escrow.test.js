@@ -137,6 +137,36 @@ describe('Escrow', async function () {
     expect(ownerOf).to.equal(spender.address);
   });
 
+  it('#7 구매된 상품 거래 파기하기', async function () {
+    const amount = ethers.utils.parseEther('1000'); // 1000 ETH
+    const openTrade = await escrow
+      .connect(spender)
+      .openTrade(newProductId, amount);
+
+    const receipt = await openTrade.wait();
+    const events = receipt.events.filter((x) => {
+      return x.event == 'TradeStatusChange';
+    });
+
+    const { tradeId } = events[0].args;
+
+    await escrow.connect(user).executeTrade(tradeId, { value: amount });
+
+    // 거래파기는 판매자 또는 컨트랙트 소유자가 승인
+    await escrow.connect(spender).approveBreak(tradeId, user.address);
+
+    // 구매자 측에서 거래파기 요청
+    await escrow.connect(user).breakTrade(tradeId);
+
+    const trade = await escrow.trades(tradeId);
+    const executedTrade = await escrow.executedTradeToSpender(tradeId);
+
+    expect(trade.poster).to.equal(spender.address);
+    expect(executedTrade).to.equal(
+      '0x0000000000000000000000000000000000000000',
+    );
+  });
+
   it('#0 ProductOwnership 컨트랙트 변경하기', async function () {
     const Ownership = await ethers.getContractFactory('ProductOwnership');
     const ownershipInstance = await Ownership.deploy();

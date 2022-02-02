@@ -6,7 +6,12 @@ import 'hardhat/console.sol';
 
 contract Escrow {
   event TradeStatusChange(uint256 tradeId, string status);
+
   event BreakApproval(uint256 tradeId, address spender);
+
+  event BreakTrade(uint256 tradeId);
+
+  // ----------------------------------------------------------------------
 
   struct Trade {
     address poster;
@@ -109,8 +114,10 @@ contract Escrow {
 
     payable(executedTradeToSpender[_tradeId]).transfer(trades[_tradeId].amount);
 
+    executedTradeToSpender[_tradeId] = address(0);
     trades[_tradeId].status = 'open';
 
+    emit BreakTrade(_tradeId);
     emit TradeStatusChange(_tradeId, 'open');
   }
 
@@ -123,13 +130,6 @@ contract Escrow {
       'Caller is not the poster or owner'
     );
 
-    _approveBreak(_tradeId, _spender);
-  }
-
-  /**
-   * @dev 거래 파기 승인
-   */
-  function _approveBreak(uint256 _tradeId, address _spender) private {
     _breakApprovals[_tradeId] = _spender;
 
     emit BreakApproval(_tradeId, _spender);
