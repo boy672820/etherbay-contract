@@ -10,14 +10,14 @@ contract ProductOwnership is ProductFactory {
   mapping(uint256 => address) private _approvals;
 
   /**
-   * @dev 토큰 소유량 가여조기
+   * @dev 토큰 소유량 가져오기
    */
   function balanceOf(address _owner) public view virtual returns (uint256) {
     return ownerProductCount[_owner];
   }
 
   /**
-   * @dev 토큰 소유자 가저오기
+   * @dev 토큰 소유자 가져오기
    */
   function ownerOf(uint256 _tokenId) public view returns (address) {
     return productToOwner[_tokenId];

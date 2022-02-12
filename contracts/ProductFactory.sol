@@ -4,10 +4,10 @@ pragma solidity ^0.8.0;
 contract ProductFactory {
   event NewProduct(
     uint256 id,
-    string name,
+    string indexed name,
     string category,
-    string description,
-    string image
+    string indexed description,
+    string indexed image
   );
 
   struct Product {
