@@ -2,24 +2,34 @@
 pragma solidity ^0.8.0;
 
 import './ProductFactory.sol';
+import './IProductOwnership.sol';
 
-contract ProductOwnership is ProductFactory {
-  event Transfer(address from, address to, uint256 tokenId);
-  event Approval(address productToOwner, address to, uint256 tokenId);
-
+contract ProductOwnership is ProductFactory, IProductOwnership {
   mapping(uint256 => address) private _approvals;
 
   /**
    * @dev 토큰 소유량 가져오기
    */
-  function balanceOf(address _owner) public view virtual returns (uint256) {
+  function balanceOf(address _owner)
+    public
+    view
+    virtual
+    override
+    returns (uint256)
+  {
     return ownerProductCount[_owner];
   }
 
   /**
    * @dev 토큰 소유자 가져오기
    */
-  function ownerOf(uint256 _tokenId) public view returns (address) {
+  function ownerOf(uint256 _tokenId)
+    public
+    view
+    virtual
+    override
+    returns (address)
+  {
     return productToOwner[_tokenId];
   }
 
@@ -30,7 +40,7 @@ contract ProductOwnership is ProductFactory {
     address _from,
     address _to,
     uint256 _tokenId
-  ) external {
+  ) external virtual override {
     require(
       _isApprovedOrOwner(msg.sender, _tokenId),
       'Transfer caller is not owner nor approved'
@@ -42,7 +52,7 @@ contract ProductOwnership is ProductFactory {
   /**
    * @dev 소유자가 토큰 승인하기
    */
-  function approve(address _to, uint256 _tokenId) public {
+  function approve(address _to, uint256 _tokenId) public virtual override {
     address owner = this.ownerOf(_tokenId);
 
     require(_to != owner, 'Approval to current owner');
@@ -57,7 +67,13 @@ contract ProductOwnership is ProductFactory {
   /**
    * @dev 승인 여부 가져오기
    */
-  function getApproved(uint256 _tokenId) public view returns (address) {
+  function getApproved(uint256 _tokenId)
+    public
+    view
+    virtual
+    override
+    returns (address)
+  {
     require(_exists(_tokenId), 'Operator query for nonexistent token');
 
     return _approvals[_tokenId];

@@ -2,10 +2,18 @@
 pragma solidity ^0.8.0;
 
 interface IProductOwnership {
-  event Transfer(address from, address to, uint256 tokenId);
-  event Approval(address productToOwner, address to, uint256 tokenId);
+  event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 indexed tokenId
+  );
+  event Approval(
+    address indexed productToOwner,
+    address indexed to,
+    uint256 indexed tokenId
+  );
 
-  function balanaceOf(address _owner) external view returns (uint256);
+  function balanceOf(address _owner) external view returns (uint256);
 
   function ownerOf(uint256 _tokenId) external view returns (address);
 

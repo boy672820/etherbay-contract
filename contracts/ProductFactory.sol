@@ -1,14 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import './IProductOwnership.sol';
+
 contract ProductFactory {
-  event NewProduct(
-    uint256 id,
-    string indexed name,
-    string category,
-    string indexed description,
-    string indexed image
-  );
+  event NewProduct(uint256 id, address indexed to);
 
   struct Product {
     string name;
@@ -39,7 +35,7 @@ contract ProductFactory {
     productToOwner[id] = msg.sender;
     ownerProductCount[msg.sender]++;
 
-    emit NewProduct(id, _name, _category, _description, _image);
+    emit NewProduct(id, msg.sender);
   }
 
   /**

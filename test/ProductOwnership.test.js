@@ -29,11 +29,11 @@ describe('ProductOwnership', async function () {
   });
 
   it('#1 상품 생성하기', async function () {
-    const createProduct = await productOwnership
+    const tx = await productOwnership
       .connect(user)
       .createProduct(...product);
 
-    const receipt = await createProduct.wait();
+    const receipt = await tx.wait();
 
     const events = receipt.events.filter((x) => {
       return x.event == 'NewProduct';
