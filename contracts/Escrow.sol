@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import './IProductOwnership.sol';
-import 'hardhat/console.sol';
 
 contract Escrow {
   event TradeStatusChange(uint256 tradeId, string status);
