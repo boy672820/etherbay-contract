@@ -17,27 +17,27 @@ task(
   '컨트랙트 배포 및 주소 저장(.contracts.json)',
   async (taskArgs, hre) => {
     // ProductOwnership
-    const ProductOwnership = await hre.ethers.getContractFactory(
-      'ProductOwnership',
+    const EtherbayProduct = await hre.ethers.getContractFactory(
+      'EtherbayProduct',
     );
-    const productOwnership = await ProductOwnership.deploy();
+    const etherbayProduct = await EtherbayProduct.deploy();
 
-    await productOwnership.deployed();
+    await etherbayProduct.deployed();
 
-    console.log('ProductOwnership deployed to:', productOwnership.address);
+    console.log('EtherbayProduct deployed to:', etherbayProduct.address);
 
     // Escrow
-    const Escrow = await hre.ethers.getContractFactory('Escrow');
-    const escrow = await Escrow.deploy(productOwnership.address);
+    // const Escrow = await hre.ethers.getContractFactory('Escrow');
+    // const escrow = await Escrow.deploy(productOwnership.address);
 
-    await escrow.deployed();
+    // await escrow.deployed();
 
-    console.log('Escrow deployed to:', escrow.address);
+    // console.log('Escrow deployed to:', escrow.address);
 
-    // 컨트랙트 주소 json 파일로 저장
+    // // 컨트랙트 주소 json 파일로 저장
     const contracts = {
-      ProductOwnership: productOwnership.address,
-      Escrow: escrow.address,
+      EtherbayProduct: etherbayProduct.address,
+      // Escrow: escrow.address,
     };
 
     fs.writeFileSync('./.contracts.json', JSON.stringify(contracts));
