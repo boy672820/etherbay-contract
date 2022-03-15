@@ -12,6 +12,16 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
   }
 });
 
+task('contracts', '컨트랙트 주소 정보', async () => {
+  const contracts = getContractAddress();
+
+  const keys = Object.keys(contracts);
+
+  keys.forEach((key) => {
+    console.log(`${key}: ${contracts[key]}`);
+  });
+});
+
 task(
   'deploy',
   '컨트랙트 배포 및 주소 저장(.contracts.json)',

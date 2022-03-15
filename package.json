@@ -1,5 +1,12 @@
 {
   "name": "hardhat-project",
+  "scripts": {
+    "node": "./node_modules/.bin/hardhat node",
+    "compile": "./node_modules/.bin/hardhat compile",
+    "deploy": "./node_modules/.bin/hardhat deploy",
+    "contracts": "./node_modules/.bin/hardhat contracts",
+    "accounts": "./node_modules/.bin/hardhat accounts"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.4",
     "@nomiclabs/hardhat-waffle": "^2.0.2",
